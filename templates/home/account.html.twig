@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte{% endblock %}
+
+{% block body %}
+<div class="login-container">
+    <div class="login-card">
+
+        {% for message in app.flashes('error') %}
+            <div class="error">{{ message }}</div>
+        {% endfor %}
+        {% for message in app.flashes('success') %}
+            <div class="success">{{ message }}</div>
+        {% endfor %}
+
+        <!-- SWITCH -->
+        <div class="switch">
+            <button id="btn-login" class="switch-btn active">Connexion</button>
+            <button id="btn-signup" class="switch-btn">Inscription</button>
+            <div class="indicator"></div>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form id="login-form" class="form active" method="post" action="{{ path('account') }}">
+            <h1 class="title">Connexion</h1>
+            <div class="input-group">
+                <input type="email" name="email" required>
+                <label>Email</label>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" required>
+                <label>Mot de passe</label>
+            </div>
+            <button class="btn-login">Se connecter</button>
+        </form>
+
+        <!-- SIGNUP FORM -->
+        <form id="signup-form" class="form" method="post" action="{{ path('signup') }}">
+            <h1 class="title">Inscription</h1>
+            <div class="input-group">
+                <input type="text" name="firstname" required>
+                <label>Prénom</label>
+            </div>
+            <div class="input-group">
+                <input type="text" name="lastname" required>
+                <label>Nom</label>
+            </div>
+            <div class="input-group">
+                <input type="email" name="email" required>
+                <label>Email</label>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" required>
+                <label>Mot de passe</label>
+            </div>
+            <button class="btn-login">Créer mon compte</button>
+        </form>
+
+    </div>
+</div>
+
+<script>
+const loginBtn = document.getElementById('btn-login');
+const signupBtn = document.getElementById('btn-signup');
+const loginForm = document.getElementById('login-form');
+const signupForm = document.getElementById('signup-form');
+const indicator = document.querySelector('.indicator');
+
+loginBtn.onclick = () => {
+    loginBtn.classList.add('active');
+    signupBtn.classList.remove('active');
+    loginForm.classList.add('active');
+    signupForm.classList.remove('active');
+    indicator.style.transform = 'translateX(0)';
+};
+
+signupBtn.onclick = () => {
+    signupBtn.classList.add('active');
+    loginBtn.classList.remove('active');
+    signupForm.classList.add('active');
+    loginForm.classList.remove('active');
+    indicator.style.transform = 'translateX(100%)';
+};
+</script>
+{% endblock %}

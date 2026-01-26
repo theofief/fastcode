@@ -1,0 +1,309 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+/* BACKGROUND */
+body {
+  height: 100vh;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CONTAINER */
+.login-container {
+  animation: fadeIn 1s ease forwards;
+}
+
+/* CARD */
+.login-card {
+  width: 380px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  animation: slideUp 0.8s ease forwards;
+}
+
+/* TITLES */
+.title {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 30px;
+}
+
+/* INPUTS */
+.input-group {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 16px;
+  outline: none;
+}
+
+.input-group label {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: 0.3s ease;
+}
+
+/* FLOATING LABEL */
+.input-group input:focus + label,
+.input-group input:valid + label {
+  top: -6px;
+  font-size: 12px;
+  color: #00e6ff;
+}
+
+/* BUTTON */
+.btn-login {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #00e6ff, #0072ff);
+  color: #000;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 230, 255, 0.4);
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.footer a {
+  color: #00e6ff;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* SWITCH */
+.switch {
+  position: relative;
+  display: flex;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.switch-btn {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.switch-btn.active {
+  color: #000;
+}
+
+.indicator {
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(135deg, #00e6ff, #0072ff);
+  top: 0;
+  left: 0;
+  border-radius: 10px;
+  transition: transform 0.4s ease;
+  z-index: 1;
+}
+
+/* FORMS */
+.form {
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+
+.form.active {
+  display: block;
+}
+
+/* NAVBAR */
+.navbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  transition-duration: 0.5s;
+}
+
+.nav-left .logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+  text-decoration: none;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-right a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-right a:hover {
+  color: #00e6ff;
+}
+
+/* LOGOUT BUTTON */
+.logout-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #00e6ff, #0072ff);
+  color: #000;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* BURGER MENU ICON */
+.burger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 25px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.burger span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background: #fff;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+  .nav-right {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    height: 0;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    flex-direction: column;
+    align-items: center;
+    gap: 0; /* <-- plus de gap quand fermé */
+    padding: 0; /* <-- supprime padding quand fermé */
+    transition:
+      height 0.5s ease,
+      background 0.3s ease,
+      padding 0.5s ease,
+      gap 0.5s ease;
+    border: none;
+    z-index: 999;
+    box-shadow: none;
+  }
+
+  .nav-right.active {
+    height: calc(100vh - 60px);
+    padding-top: 20px; /* <-- remet padding quand ouvert */
+    gap: 20px; /* <-- remet l’espace entre liens */
+  }
+
+  .nav-right a {
+    font-size: 20px;
+    text-align: center;
+    width: 100%;
+    padding: 10px 0;
+  }
+
+  .burger {
+    display: flex;
+    cursor: pointer;
+    z-index: 1001; /* toujours au-dessus du menu */
+  }
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* RESPONSIVE */
+@media (max-width: 420px) {
+  .login-card {
+    width: 90%;
+    padding: 30px;
+  }
+}

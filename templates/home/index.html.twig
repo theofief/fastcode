@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block body %}
+
+<header>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="{{ path('home') }}" class="logo">MonSite</a>
+        </div>
+
+        <div class="nav-right" id="nav-links">
+            <a href="{{ path('home') }}">Accueil</a>
+            <a href="#">Profil</a>
+            <a href="#">Contact</a>
+            <a href="logout">
+                <button type="button" class="logout-btn">Logout</button>
+            </a>
+        </div>
+
+        <div class="burger" id="burger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <h1>Bienvenue sur votre espace !</h1>
+    <p>Contenu de la page Home ici...</p>
+</main>
+
+<script>
+const burger = document.getElementById('burger');
+const navLinks = document.getElementById('nav-links');
+
+burger.addEventListener('click', () => {
+    navLinks.classList.toggle('active');
+});
+</script>
+
+{% endblock %}

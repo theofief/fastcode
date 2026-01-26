@@ -1,0 +1,37 @@
+security:
+    password_hashers:
+        App\Entity\User:
+            algorithm: auto
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            pattern: ^/
+            lazy: true
+            provider: app_user_provider
+
+            form_login:
+                login_path: account      # la route qui affiche le form
+                check_path: account      # POST pour Symfony Security
+                username_parameter: email
+                password_parameter: password
+                default_target_path: /home
+
+            logout:
+                path: /logout
+                target: /               # redirige vers login après logout
+
+    access_control:
+        # page /home accessible seulement aux utilisateurs connectés
+        - { path: ^/home, roles: ROLE_USER }
+        # page login/signup accessible par tous
+        - { path: ^/, roles: PUBLIC_ACCESS }
