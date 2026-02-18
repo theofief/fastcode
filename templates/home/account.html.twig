@@ -50,12 +50,22 @@
                 <label>Email</label>
             </div>
             <div class="input-group">
-                <input type="password" name="password" required>
+                <input type="password" id="password" name="password" required>
                 <label>Mot de passe</label>
             </div>
-            <button class="btn-login">Créer mon compte</button>
+            <div class="input-group">
+                <input type="password" id="confirm-password" name="confirm_password" required>
+                <label>Confirmer mot de passe</label>
+                <span id="password-error" class="error-msg" style="display:none;">Les mots de passe ne correspondent pas !</span>
+            </div>
+            <button type="submit" class="btn-login">Créer mon compte</button>
         </form>
 
+    </div>
+    <div class="page-wrapper">
+        <footer class="footer">
+            <p>© {{ "now"|date("Y") }} Théo Fief — Tous droits réservés</p>
+        </footer>
     </div>
 </div>
 
@@ -65,6 +75,9 @@ const signupBtn = document.getElementById('btn-signup');
 const loginForm = document.getElementById('login-form');
 const signupForm = document.getElementById('signup-form');
 const indicator = document.querySelector('.indicator');
+const pwd = document.getElementById('password');
+const confirmPwd = document.getElementById('confirm-password');
+const errorMsg = document.getElementById('password-error');
 
 loginBtn.onclick = () => {
     loginBtn.classList.add('active');
@@ -81,5 +94,49 @@ signupBtn.onclick = () => {
     loginForm.classList.remove('active');
     indicator.style.transform = 'translateX(100%)';
 };
+
+// Vérification mot de passe identique avant envoi
+signupForm.addEventListener('submit', (e) => {
+    if (pwd.value !== confirmPwd.value) {
+        e.preventDefault();
+        errorMsg.style.display = 'block';
+    } else {
+        errorMsg.style.display = 'none';
+    }
+});
+
+// Masquer l'erreur dès qu'on commence à taper
+confirmPwd.addEventListener('input', () => {
+    if (errorMsg.style.display === 'block') {
+        errorMsg.style.display = 'none';
+    }
+});
 </script>
+
+<style>
+.error-msg {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: block;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* centre vertical */
+    align-items: center;     /* centre horizontal */
+}
+
+.footer {
+    text-align: center;
+    padding: 15px;
+}
+</style>
 {% endblock %}

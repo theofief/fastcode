@@ -1,0 +1,537 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin{% endblock %}
+
+{% block body %}
+
+<main class="admin-container">
+
+    <h1>Admin Panel</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="flash-success">{{ message }}</div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="flash-error">{{ message }}</div>
+    {% endfor %}
+
+    <!-- Bouton descendre vers produits -->
+    <div class="scroll-btn-container">
+        <button onclick="document.getElementById('products-section').scrollIntoView({behavior:'smooth'});" class="scroll-btn">↓ Produits</button>
+    </div>
+
+    <!-- USERS -->
+    <section class="admin-section" id="users-section">
+        <h2>Utilisateurs</h2>
+
+        <input type="text" id="search-users" placeholder="Rechercher un utilisateur..." class="search-bar">
+
+        <div class="table-wrapper glass">
+            <table class="admin-table" id="users-table">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>Création</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <form action="{{ path('admin_user_update', {id: user.id}) }}" method="POST">
+                                <td><input type="text" name="last_name" value="{{ user.lastName }}"></td>
+                                <td><input type="text" name="first_name" value="{{ user.firstName }}"></td>
+                                <td><input type="email" name="email" value="{{ user.email }}"></td>
+                                <td>
+                                    <select name="role">
+                                        <option value="ROLE_USER" {% if 'ROLE_USER' in user.roles %}selected{% endif %}>User</option>
+                                        <option value="ROLE_ADMIN" {% if 'ROLE_ADMIN' in user.roles %}selected{% endif %}>Admin</option>
+                                    </select>
+                                </td>
+                                <td>{{ user.createdAt|date('d/m/Y') }}</td>
+                                <td class="actions">
+                                    <button type="submit" class="btn-primary">Update</button>
+                            </form>
+
+                            <form action="{{ path('admin_user_delete', {id: user.id}) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_user_' ~ user.id) }}">
+                                <button type="submit" class="btn-danger">Delete</button>
+                            </form>
+                                </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="scroll-btn-container">
+        <button onclick="document.getElementById('users-section').scrollIntoView({behavior:'smooth'});" class="scroll-btn">↑ Utilisateurs</button>
+    </div>
+
+    <!-- PRODUCTS -->
+    <section class="admin-section" id="products-section">
+        <h2>Produits</h2>
+
+        <!-- Form création produit -->
+        <form action="{{ path('admin_product_create') }}"
+              method="POST"
+              enctype="multipart/form-data"
+              class="product-form glass">
+
+            <input type="text" name="product_name" placeholder="Nom du produit" required>
+            <input type="text" name="code" placeholder="Code unique" required>
+
+            <select name="category" required>
+                <option value="">-- Catégorie --</option>
+                <option value="fruit">Fruit</option>
+                <option value="legume">Légume</option>
+                <option value="autre">Autre</option>
+            </select>
+
+            <textarea name="comment" placeholder="Commentaire"></textarea>
+
+            <input type="file" name="image" accept="image/*">
+
+            <button type="submit" class="btn-primary full">Ajouter produit</button>
+        </form>
+
+        <input type="text" id="search-products" placeholder="Rechercher un produit..." class="search-bar">
+
+        <!-- Tableau des produits -->
+        <div class="table-wrapper glass">
+            <table class="admin-table" id="products-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th class="sortable" data-sort="product_name">
+                            Nom <span class="sort-indicator">─</span>
+                        </th>
+                        <th class="sortable" data-sort="code">
+                            Code <span class="sort-indicator-code">─</span>
+                        </th>
+                        <th>Catégorie</th>
+                        <th>Commentaire</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <form action="{{ path('admin_product_update', {id: product.id}) }}"
+                                  method="POST"
+                                  enctype="multipart/form-data">
+                                <td>
+                                    {% if product.image %}
+                                        <label for="image_{{ product.id }}">
+                                            <img src="/uploads/products/{{ product.image }}"
+                                                 class="product-thumb" title="Cliquer pour changer">
+                                        </label>
+                                    {% else %}
+                                        <label for="image_{{ product.id }}">
+                                            <span class="no-img">—</span>
+                                        </label>
+                                    {% endif %}
+                                    <input type="file" id="image_{{ product.id }}" name="image" accept="image/*" style="display:none;">
+                                </td>
+
+                                <td><input type="text" name="product_name" value="{{ product.productName }}" required></td>
+                                <td><input type="text" name="code" value="{{ product.code }}" required></td>
+
+                                <td>
+                                    <select name="category" required>
+                                        <option value="fruit" {% if product.category == 'fruit' %}selected{% endif %}>Fruit</option>
+                                        <option value="legume" {% if product.category == 'legume' %}selected{% endif %}>Légume</option>
+                                        <option value="autre" {% if product.category == 'autre' %}selected{% endif %}>Autre</option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    {% if product.comment %}
+                                        <textarea name="comment">{{ product.comment }}</textarea>
+                                    {% endif %}
+                                </td>
+
+                                <td class="actions">
+                                    <button type="submit" class="btn-primary">Update</button>
+                            </form>
+
+                            <form action="{{ path('admin_product_delete', {id: product.id}) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Supprimer ce produit ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_product_' ~ product.id) }}">
+                                <button type="submit" class="btn-danger">Delete</button>
+                            </form>
+                                </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align:center;">Aucun produit</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<style>
+/* ===== Container Admin ===== */
+.admin-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* ===== Sections ===== */
+.admin-section {
+    margin-top: 50px;
+    position: relative;
+}
+
+.admin-section h2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+}
+
+/* ===== Table Wrapper ===== */
+.table-wrapper {
+    overflow-x: auto;
+    margin-top: 15px;
+    border-radius: 15px;
+    backdrop-filter: blur(15px);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+}
+
+/* ===== Tables ===== */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px 10px;
+    text-align: left;
+}
+
+.admin-table th {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.admin-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-table input[type="text"],
+.admin-table input[type="email"],
+.admin-table select,
+.admin-table textarea {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+/* ===== Buttons ===== */
+.btn-primary {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(0, 123, 255, 0.7);
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    background: rgba(0, 123, 255, 1);
+}
+
+.btn-danger {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 0, 0, 0.7);
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-danger:hover {
+    background: rgba(255, 0, 0, 1);
+}
+
+/* ===== Flash Messages ===== */
+.flash-success, .flash-error {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.flash-success {
+    background: rgba(0, 255, 0, 0.2);
+    color: #0f0;
+}
+
+.flash-error {
+    background: rgba(255, 0, 0, 0.2);
+    color: #f00;
+}
+
+/* ===== Search Bars ===== */
+.search-input {
+    width: 100%;
+    padding: 8px 12px;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    color: white;
+    font-size: 1rem;
+}
+
+.search-input::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+/* ===== Product Thumb ===== */
+.product-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* ===== Form Creation ===== */
+.product-form input,
+.product-form select,
+.product-form textarea {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+.product-form button.full {
+    width: 100%;
+    margin-top: 10px;
+}
+.search-bar {
+    width: 100%;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 15px;
+    border: none;
+    outline: none;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+}
+.search-bar::placeholder { color: #ddd; }
+.search-bar:focus { background: rgba(255,255,255,0.25); }
+
+.table-wrapper.glass {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 15px;
+    overflow-x: auto;
+}
+
+.product-thumb { width: 50px; height:50px; object-fit: cover; border-radius:5px; cursor:pointer; }
+
+.scroll-btn-container { margin: 10px 0; text-align: right; }
+.scroll-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    padding: 5px 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: 0.3s;
+}
+.scroll-btn:hover { background: rgba(255,255,255,0.25); }
+
+
+/* Animation pour les lignes du tableau */
+.admin-table tbody tr {
+    transition: all 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Lignes qui disparaissent */
+.admin-table tbody tr.removing {
+    opacity: 0;
+    transform: translateY(-10px);
+    height: 0;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+}
+
+/* Lignes qui apparaissent */
+.admin-table tbody tr.adding {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<script>
+function animateRow(row, show) {
+    if (show) {
+        row.classList.remove('removing');
+        row.classList.add('adding');
+        row.style.display = '';
+        setTimeout(() => row.classList.remove('adding'), 300); // Fin animation ajout
+    } else {
+        if (!row.classList.contains('removing')) {
+            row.classList.add('removing');
+            setTimeout(() => { row.style.display = 'none'; row.classList.remove('removing'); }, 300);
+        }
+    }
+}
+
+// --- Users Live Search ---
+const searchUsers = document.getElementById('search-users');
+searchUsers.addEventListener('input', () => {
+    const q = searchUsers.value.trim().toLowerCase();
+    const rows = document.querySelectorAll('#users-table tbody tr');
+
+    // Si recherche vide, tout montrer directement
+    if (q === '') {
+        rows.forEach(row => {
+            row.style.display = '';
+            row.classList.remove('removing', 'adding');
+        });
+        return;
+    }
+
+    rows.forEach(row => {
+        const last = row.querySelector('input[name="last_name"]').value.toLowerCase();
+        const first = row.querySelector('input[name="first_name"]').value.toLowerCase();
+        const email = row.querySelector('input[name="email"]').value.toLowerCase();
+        const role = row.querySelector('select[name="role"]').value.toLowerCase();
+        animateRow(row, last.includes(q) || first.includes(q) || email.includes(q) || role.includes(q));
+    });
+});
+
+// --- Products Live Search ---
+const searchProducts = document.getElementById('search-products');
+searchProducts.addEventListener('input', () => {
+    const q = searchProducts.value.trim().toLowerCase();
+    const rows = document.querySelectorAll('#products-table tbody tr');
+
+    // Si recherche vide, tout montrer directement
+    if (q === '') {
+        rows.forEach(row => {
+            row.style.display = '';
+            row.classList.remove('removing', 'adding');
+        });
+        return;
+    }
+
+    rows.forEach(row => {
+        const name = row.querySelector('input[name="product_name"]').value.toLowerCase();
+        const code = row.querySelector('input[name="code"]').value.toLowerCase();
+        const category = row.querySelector('select[name="category"]').value.toLowerCase();
+        const commentEl = row.querySelector('textarea[name="comment"]');
+        const comment = commentEl ? commentEl.value.toLowerCase() : '';
+        animateRow(row, name.includes(q) || code.includes(q) || category.includes(q) || comment.includes(q));
+    });
+});
+// --- Sorting Products ---
+const sortDirections = {
+    product_name: true,
+    code: true
+};
+
+document.querySelectorAll('#products-table .sortable').forEach(header => {
+
+    header.addEventListener('click', () => {
+
+        const field = header.dataset.sort;
+        const tbody = document.querySelector('#products-table tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        const asc = sortDirections[field];
+
+        rows.sort((a, b) => {
+
+            const aVal = a.querySelector(`[name="${field}"]`).value.toLowerCase();
+            const bVal = b.querySelector(`[name="${field}"]`).value.toLowerCase();
+
+            if (aVal < bVal) return asc ? -1 : 1;
+            if (aVal > bVal) return asc ? 1 : -1;
+            return 0;
+
+        });
+
+        sortDirections[field] = !asc;
+
+        // Reset toutes les flèches
+        document.querySelectorAll('#products-table .sortable').forEach(h => {
+
+            h.classList.remove('active');
+
+            const indicator =
+                h.querySelector('.sort-indicator') ||
+                h.querySelector('.sort-indicator-code');
+
+            if (indicator) indicator.textContent = '─';
+
+        });
+
+        // Ajouter flèche sur colonne actuelle
+        header.classList.add('active');
+
+        const indicator =
+            header.querySelector('.sort-indicator') ||
+            header.querySelector('.sort-indicator-code');
+
+        if (indicator) {
+            indicator.textContent = asc ? '▲' : '▼';
+        }
+
+        rows.forEach(row => {
+
+            tbody.appendChild(row);
+
+            row.classList.remove('adding');
+            void row.offsetWidth;
+            row.classList.add('adding');
+
+        });
+
+    });
+
+});
+</script>
+
+{% endblock %}

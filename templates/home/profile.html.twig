@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil{% endblock %}
+
+{% block body %}
+
+<main>
+    <div class="profile-container">
+        <h1>Votre Profil</h1>
+
+        {% for message in app.flashes('success') %}
+            <div class="flash-success">{{ message }}</div>
+        {% endfor %}
+
+        <div class="profile-info">
+            <!-- EMAIL -->
+            <div class="profile-field">
+                <label>Email:</label>
+                <span class="editable" data-field="email">{{ user.email }}</span>
+                <form action="{{ path('profile_update') }}" method="POST" class="inline-form hidden" data-field="email">
+                    <input type="email" name="email" value="{{ user.email }}" required>
+                    <button type="submit">Valider</button>
+                </form>
+            </div>
+
+            <!-- FIRST NAME -->
+            <div class="profile-field">
+                <label>Prénom:</label>
+                <span class="editable" data-field="first_name">{{ user.firstName }}</span>
+                <form action="{{ path('profile_update') }}" method="POST" class="inline-form hidden" data-field="first_name">
+                    <input type="text" name="first_name" value="{{ user.firstName }}" required>
+                    <button type="submit">Valider</button>
+                </form>
+            </div>
+
+            <!-- LAST NAME -->
+            <div class="profile-field">
+                <label>Nom:</label>
+                <span class="editable" data-field="last_name">{{ user.lastName }}</span>
+                <form action="{{ path('profile_update') }}" method="POST" class="inline-form hidden" data-field="last_name">
+                    <input type="text" name="last_name" value="{{ user.lastName }}" required>
+                    <button type="submit">Valider</button>
+                </form>
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="profile-field">
+                <label>Mot de passe:</label>
+                <button type="button" class="editable-btn" data-field="password">Modifier le mot de passe</button>
+                <form action="{{ path('profile_update') }}" method="POST" class="inline-form hidden" data-field="password">
+                    <input type="password" name="password" placeholder="Nouveau mot de passe">
+                    <button type="submit">Valider</button>
+                </form>
+            </div>
+        </div>
+
+        <form action="{{ path('profile_delete') }}" method="POST" class="delete-form" onsubmit="return confirm('Voulez-vous vraiment supprimer votre compte ?');">
+            <button type="submit" class="btn-login" style="background: #ff4d4d;">Supprimer mon compte</button>
+        </form>
+    </div>
+</main>
+
+<script>
+const burger = document.getElementById('burger');
+const navLinks = document.getElementById('nav-links');
+
+burger.addEventListener('click', () => {
+    navLinks.classList.toggle('active');
+});
+
+// Inline editing
+document.querySelectorAll('.editable, .editable-btn').forEach(el => {
+    el.addEventListener('click', () => {
+        const field = el.dataset.field;
+        const spanOrBtn = el;
+        const form = document.querySelector(`.inline-form[data-field="${field}"]`);
+
+        // Toggle visibility
+        spanOrBtn.classList.add('hidden');
+        form.classList.remove('hidden');
+        form.querySelector('input').focus();
+    });
+});
+</script>
+
+<style>
+/* Masquer les forms inline par défaut */
+.inline-form.hidden {
+    display: none;
+}
+
+/* Afficher le span éditable */
+.profile-field .editable {
+    cursor: pointer;
+    padding: 4px 8px;
+    display: inline-block;
+    border-bottom: 1px dashed rgba(255,255,255,0.5);
+    transition: background 0.3s;
+}
+.profile-field .editable:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* Bouton pour mot de passe */
+.profile-field .editable-btn {
+    cursor: pointer;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #00e6ff, #0072ff);
+    color: #000;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+.profile-field .editable-btn:hover {
+    background: linear-gradient(135deg, #00bfff, #005fa3);
+}
+
+/* Styles pour le formulaire inline */
+.inline-form input {
+    padding: 4px 6px;
+    margin-right: 4px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+.inline-form button {
+    padding: 4px 6px;
+    border: none;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #00e6ff, #0072ff);
+    color: #000;
+    cursor: pointer;
+}
+</style>
+{% endblock %}

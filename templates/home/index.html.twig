@@ -4,41 +4,310 @@
 
 {% block body %}
 
-<header>
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="{{ path('home') }}" class="logo">MonSite</a>
-        </div>
-
-        <div class="nav-right" id="nav-links">
-            <a href="{{ path('home') }}">Accueil</a>
-            <a href="#">Profil</a>
-            <a href="#">Contact</a>
-            <a href="logout">
-                <button type="button" class="logout-btn">Logout</button>
-            </a>
-        </div>
-
-        <div class="burger" id="burger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-    </nav>
-</header>
-
-<main>
+<main class="home-container">
     <h1>Bienvenue sur votre espace !</h1>
-    <p>Contenu de la page Home ici...</p>
+
+    <!-- Barre de recherche -->
+    <div class="search-bar-wrapper">
+        <input type="text" id="search-input" placeholder="Rechercher un produit par nom, code ou commentaire...">
+        <div id="search-results" class="search-results"></div>
+    </div>
+
+    <!-- Affichage produit sélectionné -->
+    <div id="selected-product" class="selected-product" style="display:none;"></div>
+
+    <!-- Jeu de mémorisation -->
+    <div class="memory-game">
+        <h2>Entraînement mémoire</h2>
+
+        <div id="game-card" class="game-card" style="display:none;">
+            <div id="game-info"></div>
+
+            <input type="text" id="game-answer" placeholder="Ta réponse...">
+
+            <div class="game-buttons">
+                <button id="game-submit">Valider</button>
+                <button id="game-next">Produit suivant</button>
+            </div>
+
+            <div id="game-result"></div>
+            <div id="game-score">Score : 0</div>
+        </div>
+
+        <button id="start-game">Commencer</button>
+    </div>
 </main>
+
+<style>
+/* --- Glassmorphism et style global de recherche --- */
+.search-bar-wrapper {
+    position: relative;
+    max-width: 600px;
+    margin: 30px auto;
+}
+
+#search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 15px;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+}
+
+#search-input:focus {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.search-results {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    width: 100%;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    overflow: hidden;
+    max-height: 400px;
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: 0.3s;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.search-results.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.search-result-item:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.search-result-item img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-right: 15px;
+}
+
+.selected-product {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 20px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(15px);
+    color: #fff;
+    text-align: center;
+    transition: opacity 0.3s;
+}
+
+.selected-product img {
+    max-width: 100%;
+    border-radius: 15px;
+    margin-bottom: 15px;
+}
+/* --- Boutons du jeu --- */
+.game-buttons button,
+#start-game {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin: 5px;
+}
+
+.game-buttons button:hover,
+#start-game:hover {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+</style>
 
 <script>
 const burger = document.getElementById('burger');
 const navLinks = document.getElementById('nav-links');
+burger.addEventListener('click', () => navLinks.classList.toggle('active'));
 
-burger.addEventListener('click', () => {
-    navLinks.classList.toggle('active');
+const searchInput = document.getElementById('search-input');
+const resultsContainer = document.getElementById('search-results');
+const selectedContainer = document.getElementById('selected-product');
+let timeout;
+
+// --- VARIABLES DU JEU ---
+let currentProduct = null;
+let score = 0;
+let mode = null;
+
+const startBtn = document.getElementById('start-game');
+const gameCard = document.getElementById('game-card');
+const gameInfo = document.getElementById('game-info');
+const gameAnswer = document.getElementById('game-answer');
+const gameResult = document.getElementById('game-result');
+const gameScore = document.getElementById('game-score');
+
+// --- RECHERCHE ---
+searchInput.addEventListener('input', () => {
+
+    clearTimeout(timeout);
+    const query = searchInput.value.trim();
+
+    // --- Masquer le jeu visuellement mais garder les valeurs ---
+    gameCard.style.display = "none";
+    startBtn.style.display = "block";
+
+    // Redirection admin
+    if (query.toLowerCase() === 'admin') {
+        window.location.href = '/admin';
+        return;
+    }
+
+    selectedContainer.style.display = 'none';
+
+    if (!query) {
+        resultsContainer.innerHTML = '';
+        resultsContainer.classList.remove('active');
+        return;
+    }
+
+    timeout = setTimeout(() => {
+        fetch(`/home/search?q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+
+                if (!data.length) {
+                    resultsContainer.innerHTML = '<div class="search-result-item">Aucun résultat</div>';
+                } else {
+                    resultsContainer.innerHTML = data.map(p => `
+                        <div class="search-result-item" 
+                             data-id="${p.id}" 
+                             data-name="${p.name}" 
+                             data-code="${p.code}" 
+                             data-category="${p.category}" 
+                             data-comment="${p.comment || ''}" 
+                             data-image="${p.image || ''}">
+                            ${p.image ? `<img src="/uploads/products/${p.image}" alt="${p.name}">` : '—'}
+                            <div>
+                                <strong>${p.name}</strong> (${p.code})<br>
+                                <small>${p.category}${p.comment ? ' - ' + p.comment : ''}</small>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                resultsContainer.classList.add('active');
+
+                document.querySelectorAll('.search-result-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        resultsContainer.classList.remove('active');
+                        const name = item.dataset.name;
+                        const code = item.dataset.code;
+                        const category = item.dataset.category;
+                        const comment = item.dataset.comment;
+                        const image = item.dataset.image;
+
+                        selectedContainer.innerHTML = `
+                            ${image ? `<img src="/uploads/products/${image}" alt="${name}">` : '—'}
+                            <h2>${name}</h2>
+                            <p><strong>Code:</strong> ${code}</p>
+                            <p><strong>Catégorie:</strong> ${category}</p>
+                            ${comment ? `<p><strong>Commentaire:</strong> ${comment}</p>` : ''}
+                        `;
+                        selectedContainer.style.display = 'block';
+                    });
+                });
+            });
+    }, 300);
 });
+
+// --- JEU ---
+startBtn.onclick = () => {
+    startBtn.style.display = "none";
+    loadNewProduct();
+};
+
+document.getElementById('game-next').onclick = loadNewProduct;
+
+document.getElementById('game-submit').onclick = () => {
+    if (!currentProduct) return;
+
+    const answer = gameAnswer.value.trim();
+    let correct = false;
+
+    if (mode === "guess_code") {
+        correct = Number(answer) === Number(currentProduct.code);
+    }
+
+    if (mode === "guess_name") {
+        correct = answer.toLowerCase() === currentProduct.name.toLowerCase();
+    }
+
+    if (correct) {
+        score++;
+        gameResult.innerHTML = "Correct ! ✅";
+    } else {
+        gameResult.innerHTML = `Faux ! Réponse : ${mode === "guess_code" ? currentProduct.code : currentProduct.name} ❌`;
+    }
+
+    gameScore.innerHTML = "Score : " + score;
+};
+
+function loadNewProduct() {
+    fetch("/home/random-product")
+        .then(res => res.json())
+        .then(product => {
+
+            currentProduct = product;
+            gameCard.style.display = "block";
+            startBtn.style.display = "none";
+
+            gameAnswer.value = "";
+            gameResult.innerHTML = "";
+
+            mode = Math.random() > 0.5 ? "guess_code" : "guess_name";
+
+            const imageHTML = product.image ? `<img src="/uploads/products/${product.image}">` : '—';
+
+            if (mode === "guess_code") {
+                gameInfo.innerHTML = `
+                    ${imageHTML}
+                    <div>${product.name}</div>
+                    <div>${product.category}</div>
+                    <div>${product.comment || ""}</div>
+                    <div><strong>Devine le CODE</strong></div>
+                `;
+            } else {
+                gameInfo.innerHTML = `
+                    <div>Code : ${product.code}</div>
+                    <div>${product.category}</div>
+                    <div>${product.comment || ""}</div>
+                    <div><strong>Devine le NOM</strong></div>
+                `;
+            }
+        });
+}
 </script>
 
 {% endblock %}

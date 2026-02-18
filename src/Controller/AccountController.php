@@ -16,7 +16,12 @@ class AccountController extends AbstractController
     #[Route('/', name: 'account')]
     public function index(): Response
     {
-        // Simple page pour afficher les forms (login + signup)
+        // Si utilisateur déjà connecté → redirection vers /home
+        if ($this->getUser()) {
+            return $this->redirectToRoute('home');
+        }
+
+        // Sinon, afficher la page de login/signup
         return $this->render('home/account.html.twig');
     }
 

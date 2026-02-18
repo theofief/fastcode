@@ -11,6 +11,34 @@
         {% block javascripts %}
         {% endblock %}
     </head>
+
+    {% if app.request.attributes.get('_route') != 'account' %}
+    <header>
+        <nav class="navbar">
+            <div class="nav-left">
+                <a href="{{ path('home') }}" class="logo">Code Manager</a>
+            </div>
+
+            <div class="nav-right" id="nav-links">
+                {% if app.user and 'ROLE_ADMIN' in app.user.roles %}
+                    <a href="{{ path('admin_dashboard') }}">Admin panel</a>
+                {% endif %}
+                <a href="{{ path('home') }}">Accueil</a>
+                <a href="{{ path('profile') }}">Profil</a>
+                <a href="logout">
+                    <button type="button" class="logout-btn">Logout</button>
+                </a>
+            </div>
+
+            <div class="burger" id="burger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+    {% endif %}
+
     <body>
         {% block body %}{% endblock %}
     </body>
